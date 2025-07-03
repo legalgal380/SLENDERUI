@@ -1,4 +1,6 @@
--- slender_ui.lua - Biblioteca Slender UI completa
+-- slender_ui.lua - Biblioteca Slender UI Completa Corrigida
+
+local UserInputService = game:GetService("UserInputService")
 
 local SlenderUI = {}
 SlenderUI.__index = SlenderUI
@@ -34,6 +36,14 @@ function SlenderUI.new()
     stroke.Thickness = 1
     stroke.Parent = window
 
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(45, 45, 45)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(25, 25, 25))
+    }
+    gradient.Rotation = 90
+    gradient.Parent = window
+
     local topBar = Instance.new("Frame")
     topBar.Name = "TopBar"
     topBar.Size = UDim2.new(1, 0, 0, 40)
@@ -44,6 +54,11 @@ function SlenderUI.new()
     local topCorner = Instance.new("UICorner")
     topCorner.CornerRadius = UDim.new(0, 10)
     topCorner.Parent = topBar
+
+    local topStroke = Instance.new("UIStroke")
+    topStroke.Color = Color3.fromRGB(90, 90, 90)
+    topStroke.Thickness = 1
+    topStroke.Parent = topBar
 
     local title = Instance.new("TextLabel")
     title.Name = "Title"
@@ -79,7 +94,7 @@ function SlenderUI:_addElement(element, height)
     self.CurrentY = self.CurrentY + height + self.ElementSpacing
 end
 
--- 1. Botão
+-- Botão
 function SlenderUI:AddButton(text, callback)
     local btn = Instance.new("TextButton")
     btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -88,6 +103,8 @@ function SlenderUI:AddButton(text, callback)
     btn.TextSize = 18
     btn.Text = text
     btn.AutoButtonColor = false
+    btn.Active = true
+    btn.Selectable = true
 
     local corner = Instance.new("UICorner")
     corner.CornerRadius = UDim.new(0, 8)
@@ -98,8 +115,16 @@ function SlenderUI:AddButton(text, callback)
     stroke.Thickness = 1
     stroke.Parent = btn
 
+    local gradient = Instance.new("UIGradient")
+    gradient.Color = ColorSequence.new{
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(80, 80, 80)),
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(60, 60, 60))
+    }
+    gradient.Rotation = 90
+    gradient.Parent = btn
+
     btn.MouseEnter:Connect(function()
-        btn.BackgroundColor3 = Color3.fromRGB(80, 80, 80)
+        btn.BackgroundColor3 = Color3.fromRGB(90, 90, 90)
     end)
     btn.MouseLeave:Connect(function()
         btn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -112,7 +137,7 @@ function SlenderUI:AddButton(text, callback)
     return btn
 end
 
--- 2. Texto (Label simples)
+-- Texto (label simples)
 function SlenderUI:AddText(text)
     local label = Instance.new("TextLabel")
     label.BackgroundTransparency = 1
@@ -129,10 +154,11 @@ function SlenderUI:AddText(text)
     return label
 end
 
--- 3. Slider (com valor)
+-- Slider
 function SlenderUI:AddSlider(text, min, max, default, callback)
     local container = Instance.new("Frame")
     container.BackgroundTransparency = 1
+    container.Size = UDim2.new(1, 0, 0, 50)
 
     local label = Instance.new("TextLabel")
     label.Text = text
@@ -177,13 +203,11 @@ function SlenderUI:AddSlider(text, min, max, default, callback)
     fillCorner.Parent = fill
 
     local dragging = false
-    local UserInputService = game:GetService("UserInputService")
 
     sliderBar.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = true
-            local mouse = UserInputService:GetMouseLocation()
-            local relativeX = math.clamp(mouse.X - sliderBar.AbsolutePosition.X, 0, sliderBar.AbsoluteSize.X)
+            local relativeX = math.clamp(input.Position.X - sliderBar.AbsolutePosition.X, 0, sliderBar.AbsoluteSize.X)
             fill.Size = UDim2.new(relativeX / sliderBar.AbsoluteSize.X, 0, 1, 0)
             local value = math.floor(min + (max - min) * (relativeX / sliderBar.AbsoluteSize.X) + 0.5)
             valueLabel.Text = tostring(value)
@@ -212,10 +236,11 @@ function SlenderUI:AddSlider(text, min, max, default, callback)
     return container, valueLabel
 end
 
--- 4. Valor (Label dinâmico)
+-- Valor (label com atualização)
 function SlenderUI:AddValue(text, initialValue)
     local container = Instance.new("Frame")
     container.BackgroundTransparency = 1
+    container.Size = UDim2.new(1, 0, 0, 30)
 
     local label = Instance.new("TextLabel")
     label.Text = text
@@ -249,7 +274,7 @@ function SlenderUI:AddValue(text, initialValue)
     }
 end
 
--- 5. Dropdown
+-- Dropdown
 function SlenderUI:AddDropdown(text, options, callback)
     local container = Instance.new("Frame")
     container.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
@@ -334,13 +359,8 @@ function SlenderUI:AddDropdown(text, options, callback)
 
     container.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            if open then
-                dropdownList.Visible = false
-                open = false
-            else
-                dropdownList.Visible = true
-                open = true
-            end
+            open = not open
+            dropdownList.Visible = open
         end
     end)
 
@@ -349,7 +369,7 @@ function SlenderUI:AddDropdown(text, options, callback)
     return container
 end
 
--- 6. Parágrafo (label grande e com múltiplas linhas)
+-- Parágrafo (label grande)
 function SlenderUI:AddParagraph(text)
     local label = Instance.new("TextLabel")
     label.BackgroundTransparency = 1
