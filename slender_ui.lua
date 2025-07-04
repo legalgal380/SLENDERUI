@@ -350,3 +350,5 @@ function SlenderUI:AddSlider(text, min, max, default, callback, parent)
 self:_addElementToContainer(parent, container, 50)
     return container, valueLabel
 end
+
+return SlenderUI
