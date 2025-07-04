@@ -207,6 +207,56 @@ function SlenderUI:AddText(text)
 
     return label
 end
+-- Toggle
+function SlenderUI:AddToggle(text, default, callback)
+    local container = Instance.new("Frame")
+    container.BackgroundTransparency = 1
+    container.Size = UDim2.new(1, 0, 0, 40)
+
+    local label = Instance.new("TextLabel")
+    label.Text = text
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 16
+    label.TextColor3 = Color3.fromRGB(220, 220, 220)
+    label.BackgroundTransparency = 1
+    label.Size = UDim2.new(0.7, 0, 1, 0)
+    label.Position = UDim2.new(0, 0, 0, 0)
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = container
+
+    local toggleBtn = Instance.new("TextButton")
+    toggleBtn.Size = UDim2.new(0, 50, 0, 25)
+    toggleBtn.Position = UDim2.new(0.75, 0, 0.25, 0)
+    toggleBtn.BackgroundColor3 = default and Color3.fromRGB(100, 200, 100) or Color3.fromRGB(200, 100, 100)
+    toggleBtn.Text = default and "ON" or "OFF"
+    toggleBtn.Font = Enum.Font.GothamBold
+    toggleBtn.TextSize = 14
+    toggleBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    toggleBtn.AutoButtonColor = false
+    toggleBtn.Parent = container
+
+    local toggled = default
+
+    toggleBtn.MouseButton1Click:Connect(function()
+        toggled = not toggled
+        toggleBtn.BackgroundColor3 = toggled and Color3.fromRGB(100, 200, 100) or Color3.fromRGB(200, 100, 100)
+        toggleBtn.Text = toggled and "ON" or "OFF"
+        if callback then
+            callback(toggled)
+        end
+    end)
+
+    self:_addElement(container, 40)
+
+    return container
+end
+
+-- Mudar título da janela
+function SlenderUI:SetWindowName(newTitle)
+    if self.TopBar and self.TopBar:FindFirstChild("Title") then
+        self.TopBar.Title.Text = newTitle
+    end
+end
 
 -- Slider
 function SlenderUI:AddSlider(text, min, max, default, callback)
